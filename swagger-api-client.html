@@ -4,6 +4,9 @@ Copyright (c) 2015 Paul Koanui <paul.koanui@gmail.com>. All rights reserved.
 This code may only be used under the BSD style license found at http://paulkoanui.github.io/LICENSE.txt
 -->
 <link rel="import" href="../polymer/polymer.html">
+
+<link rel="import" href="../iron-meta/iron-meta.html">
+
 <link rel="import" href="swagger-import.html">
 
 <!--
@@ -20,13 +23,13 @@ Example:
 -->
 <dom-module id="swagger-api-client">
     <style></style>
-    <template></template>
+    <template>
+        <iron-meta key="swagger-clients" value="{{ _clients }}"></iron-meta>
+    </template>
 </dom-module>
 
 <script>
-
-    Polymer({
-
+    Polymer({=
         is: 'swagger-api-client',
 
         properties: {
@@ -48,8 +51,11 @@ Example:
              */
             client: {
                 type: Object
-            }
+            },
 
+            _clients: {
+                type Object
+            }
         },
 
         _specChanged: function(){
@@ -66,12 +72,17 @@ Example:
          * @fires swagger-client-ready
          */
         loadSpec: function(spec) {
+            if(this._clients[spec]) {
+                this.client = this._clients[spec];
+
+                this.fire('swagger-client-ready', { loaded: new Date() });
+
+                return;
+            }
 
             this.client = new SwaggerClient({
                 url: spec,
                 success: function() {
-
-                    console.log('swagger-client', this.client);
 
                     /**
                      * This event is fired when the Swagger API client has been fully initialized and ready for use.
@@ -83,8 +94,8 @@ Example:
                 }.bind(this)
             });
 
+            this._clients[spec] = this.client;
         },
 
     });
-
 </script>
